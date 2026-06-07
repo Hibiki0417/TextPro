@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: textpro
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
+    startCommand: python manage.py migrate && gunicorn textpro.wsgi:application
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        value: "https://*.onrender.com"
+      - key: OPENAI_MODEL
+        value: "gpt-4.1-mini"
+      - key: IMAGE_UPLOAD_MAX_BYTES
+        value: "8388608"
+      - key: OPENAI_API_KEY
+        sync: false

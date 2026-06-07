@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">TextPro logo</title>
+  <desc id="desc">A teal document mark with handwriting lines and a copy-ready text cursor.</desc>
+  <rect width="512" height="512" rx="112" fill="#0f766e"/>
+  <path d="M148 92h154l74 74v242c0 22.1-17.9 40-40 40H148c-22.1 0-40-17.9-40-40V132c0-22.1 17.9-40 40-40Z" fill="#f8fbfc"/>
+  <path d="M302 92v54c0 11 9 20 20 20h54" fill="#c9ebe6"/>
+  <path d="M178 220c24-28 47-29 68-1 19 25 39 26 60 3 10-11 22-18 36-21" fill="none" stroke="#0f766e" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M178 284h132M178 336h96" fill="none" stroke="#33434c" stroke-width="24" stroke-linecap="round"/>
+  <path d="M332 286h52v122h-52z" fill="#0f766e"/>
+  <path d="M312 286h92v30h-92zM312 378h92v30h-92z" fill="#0f766e"/>
+  <circle cx="358" cy="347" r="15" fill="#f8fbfc"/>
+</svg>
