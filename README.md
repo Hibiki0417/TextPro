@@ -134,6 +134,7 @@ textpro/
 
 - `OPENAI_API_KEY` が設定されている
 - `OPENAI_API_KEY` に余分な空白や改行が入っていない
+- Render の値に `OPENAI_API_KEY=` を含めず、`sk-...` のキー本体だけを入れている
 - OpenAI 側で API 利用上限や課金設定に問題がない
 - `OPENAI_MODEL` が利用可能な画像対応モデルになっている
 

@@ -19,6 +19,33 @@ function showMessage(text, isError = false) {
   message.classList.toggle("is-error", isError);
 }
 
+function friendlyBrowserError(error) {
+  const rawMessage = error?.message || "";
+
+  if (rawMessage.includes("did not match the expected pattern")) {
+    return "入力値の形式が正しくありません。Render の OPENAI_API_KEY は sk-... のキー本体だけを設定してください。";
+  }
+
+  if (rawMessage.includes("Failed to fetch")) {
+    return "サーバーに接続できませんでした。デプロイURLや通信状態を確認してください。";
+  }
+
+  return rawMessage || "処理に失敗しました。";
+}
+
+async function parseJsonResponse(response) {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    return response.json();
+  }
+
+  const text = await response.text();
+  return {
+    error: text ? text.slice(0, 300) : "サーバーからJSON以外の応答が返りました。",
+  };
+}
+
 imageInput.addEventListener("change", () => {
   const file = imageInput.files[0];
   showMessage("");
@@ -52,7 +79,7 @@ form.addEventListener("submit", async (event) => {
         "X-CSRFToken": formData.get("csrfmiddlewaretoken"),
       },
     });
-    const payload = await response.json();
+    const payload = await parseJsonResponse(response);
 
     if (!response.ok) {
       throw new Error(payload.error || "読み取りに失敗しました。");
@@ -63,7 +90,7 @@ form.addEventListener("submit", async (event) => {
     resultMeta.textContent = `${payload.text.length} 文字`;
     showMessage("読み取りが完了しました。");
   } catch (error) {
-    showMessage(error.message, true);
+    showMessage(friendlyBrowserError(error), true);
     resultMeta.textContent = "結果はここに表示されます。";
   } finally {
     setBusy(false);

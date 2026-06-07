@@ -62,6 +62,10 @@ def validate_image(uploaded_file) -> UploadedImage:
 def transcribe_handwriting(image: UploadedImage) -> str:
     if not settings.OPENAI_API_KEY:
         raise TranscriptionError("OPENAI_API_KEY が設定されていません。")
+    if not settings.OPENAI_API_KEY.startswith("sk-"):
+        raise TranscriptionError(
+            "OPENAI_API_KEY の形式が正しくありません。Render の値には `OPENAI_API_KEY=` を含めず、`sk-...` で始まるキー本体だけを設定してください。"
+        )
 
     encoded = base64.b64encode(image.content).decode("ascii")
     data_url = f"data:{image.content_type};base64,{encoded}"
@@ -138,6 +142,10 @@ def safe_openai_message(exc: Exception) -> str:
     message = str(exc)
     if settings.OPENAI_API_KEY:
         message = message.replace(settings.OPENAI_API_KEY, "[hidden]")
+    if "did not match the expected pattern" in message:
+        return (
+            "入力値の形式が正しくありません。Render の OPENAI_API_KEY は `sk-...` のキー本体だけにしてください。"
+        )
     return message[:500]
 
 
