@@ -138,3 +138,5 @@ textpro/
 - `OPENAI_MODEL` が利用可能な画像対応モデルになっている
 
 デフォルトは `gpt-4.1-mini` です。モデル権限エラーが出る場合は、Render の `OPENAI_MODEL` を利用可能な画像対応モデルに変更してください。
+
+`OpenAI API の利用上限に達しています` と出る場合は、OpenAI Platform の Billing / Usage / Limits を確認してください。ChatGPT Plus などの契約と OpenAI API の課金枠は別扱いです。

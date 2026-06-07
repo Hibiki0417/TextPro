@@ -109,7 +109,7 @@ def transcribe_handwriting(image: UploadedImage) -> str:
         ) from exc
     except RateLimitError as exc:
         raise TranscriptionError(
-            "OpenAI API の利用上限に達しています。しばらく待つか、OpenAI の課金/上限設定を確認してください。"
+            f"OpenAI API の利用上限に達しています。OpenAI の課金・利用上限・レート制限を確認してください。詳細: {safe_openai_message(exc)}"
         ) from exc
     except BadRequestError as exc:
         raise TranscriptionError(
