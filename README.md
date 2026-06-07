@@ -127,3 +127,14 @@ textpro/
 - `.env` は `.gitignore` に入っているため、API キーは GitHub に上がりません。
 - 実行環境に Python が無い場合、`setup.ps1` は失敗します。Python 3.10 以上をインストールしてから実行してください。
 - 読み取り精度は写真の明るさ、ピント、文字の大きさに影響されます。
+
+## OpenAI エラーが出るとき
+
+アプリ画面に OpenAI のエラーが出る場合は、まず Render の Environment で次を確認してください。
+
+- `OPENAI_API_KEY` が設定されている
+- `OPENAI_API_KEY` に余分な空白や改行が入っていない
+- OpenAI 側で API 利用上限や課金設定に問題がない
+- `OPENAI_MODEL` が利用可能な画像対応モデルになっている
+
+デフォルトは `gpt-4.1-mini` です。モデル権限エラーが出る場合は、Render の `OPENAI_MODEL` を利用可能な画像対応モデルに変更してください。

@@ -2,7 +2,17 @@ import base64
 from dataclasses import dataclass
 
 from django.conf import settings
-from openai import OpenAI, OpenAIError
+from openai import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    AuthenticationError,
+    BadRequestError,
+    OpenAI,
+    OpenAIError,
+    PermissionDeniedError,
+    RateLimitError,
+)
 
 
 ALLOWED_CONTENT_TYPES = {
@@ -38,8 +48,12 @@ def validate_image(uploaded_file) -> UploadedImage:
         max_mb = max_bytes / 1024 / 1024
         raise ImageValidationError(f"画像は {max_mb:.0f}MB 以下にしてください。")
 
+    content = uploaded_file.read()
+    if not content:
+        raise ImageValidationError("画像ファイルが空です。別の画像を選択してください。")
+
     return UploadedImage(
-        content=uploaded_file.read(),
+        content=content,
         content_type=content_type,
         name=uploaded_file.name,
     )
@@ -52,7 +66,11 @@ def transcribe_handwriting(image: UploadedImage) -> str:
     encoded = base64.b64encode(image.content).decode("ascii")
     data_url = f"data:{image.content_type};base64,{encoded}"
 
-    client = OpenAI(api_key=settings.OPENAI_API_KEY)
+    client = OpenAI(
+        api_key=settings.OPENAI_API_KEY,
+        max_retries=2,
+        timeout=60.0,
+    )
 
     try:
         response = client.responses.create(
@@ -81,13 +99,46 @@ def transcribe_handwriting(image: UploadedImage) -> str:
                 }
             ],
         )
+    except AuthenticationError as exc:
+        raise TranscriptionError(
+            "OpenAI APIキーが無効です。Render の環境変数 OPENAI_API_KEY を確認してください。"
+        ) from exc
+    except PermissionDeniedError as exc:
+        raise TranscriptionError(
+            f"このOpenAI APIキーではモデル {settings.OPENAI_MODEL} を使えません。OPENAI_MODEL を確認してください。"
+        ) from exc
+    except RateLimitError as exc:
+        raise TranscriptionError(
+            "OpenAI API の利用上限に達しています。しばらく待つか、OpenAI の課金/上限設定を確認してください。"
+        ) from exc
+    except BadRequestError as exc:
+        raise TranscriptionError(
+            f"OpenAI API に送った画像リクエストが不正です。画像形式・サイズ・モデル設定を確認してください。詳細: {safe_openai_message(exc)}"
+        ) from exc
+    except (APIConnectionError, APITimeoutError) as exc:
+        raise TranscriptionError(
+            "OpenAI API への接続がタイムアウトしました。時間を置いてもう一度試してください。"
+        ) from exc
+    except APIStatusError as exc:
+        raise TranscriptionError(
+            f"OpenAI API がエラーを返しました。status={exc.status_code} 詳細: {safe_openai_message(exc)}"
+        ) from exc
     except OpenAIError as exc:
-        raise TranscriptionError("OpenAI API の呼び出しに失敗しました。") from exc
+        raise TranscriptionError(
+            f"OpenAI API の呼び出しに失敗しました。詳細: {safe_openai_message(exc)}"
+        ) from exc
 
     text = extract_response_text(response).strip()
     if not text:
         raise TranscriptionError("文字を読み取れませんでした。別の写真で試してください。")
     return text
+
+
+def safe_openai_message(exc: Exception) -> str:
+    message = str(exc)
+    if settings.OPENAI_API_KEY:
+        message = message.replace(settings.OPENAI_API_KEY, "[hidden]")
+    return message[:500]
 
 
 def extract_response_text(response) -> str:
