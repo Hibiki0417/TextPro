@@ -97,6 +97,17 @@ Render で必要な環境変数:
 
 Render の Blueprint でこのリポジトリを指定すると、`render.yaml` の設定でビルドと起動ができます。
 
+### Railway / Docker
+
+[Dockerfile](Dockerfile) と [railway.json](railway.json) も用意しています。Railway では GitHub リポジトリを選択して、環境変数 `OPENAI_API_KEY` を設定すれば Dockerfile で起動できます。
+
+Docker でローカル起動する場合:
+
+```powershell
+docker build -t textpro .
+docker run --rm -p 8000:8000 --env-file .env textpro
+```
+
 ## 構成
 
 ```text
