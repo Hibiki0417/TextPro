@@ -1,43 +1,114 @@
 # TextPro
 
-手書き文字の写真をアップロードすると、OpenAI API で読み取り、コピーしやすいテキストとして返す Django アプリです。
+手書き文字の写真をアップロードすると、OpenAI API で読み取り、コピーしやすいテキストに変換する Django アプリです。スマホのカメラからそのまま撮影して使えるように、画面はモバイル対応にしています。
+
+![TextPro upload screen](docs/images/textpro-home.svg)
+
+## できること
+
+- 手書きメモやノートの写真をアップロード
+- OpenAI Responses API で画像を解析
+- 読み取った文字をコピーしやすいテキストエリアに表示
+- 読み取り結果をワンタップでコピー
+- スマホ、タブレット、PC で使えるレスポンシブ UI
+
+![TextPro result screen](docs/images/textpro-result.svg)
+
+## 使い方
+
+1. トップ画面で「写真を選択」を押します。
+2. 手書きメモの写真を撮るか、保存済み画像を選びます。
+3. 「テキスト化する」を押します。
+4. 読み取り結果が表示されたら、コピーボタンでコピーします。
+
+対応画像は JPEG、PNG、WebP、GIF です。画像はサーバーに保存せず、OpenAI API 呼び出しのためにメモリ上で Base64 data URL に変換します。
+
+## 必要なもの
+
+- Python 3.10 以上
+- OpenAI API キー
+- Windows PowerShell
 
 ## セットアップ
-
-Python 3.10 以上が必要です。
 
 ```powershell
 cd C:\textpro
 .\setup.ps1
 ```
 
-`.env` の `OPENAI_API_KEY` を自分の API キーに置き換えてください。
+セットアップ後、[.env](.env.example) を参考に `C:\textpro\.env` の `OPENAI_API_KEY` を設定してください。
+
+```env
+OPENAI_API_KEY=sk-your-api-key
+OPENAI_MODEL=gpt-4.1-mini
+```
 
 ## 起動
 
 ```powershell
+cd C:\textpro
 .\run.ps1
 ```
 
-ブラウザで http://127.0.0.1:8000/ を開きます。
+起動後、ブラウザで次の URL を開きます。
 
-## メモ
+```text
+http://127.0.0.1:8000/
+```
 
-- アップロード画像はサーバーに保存せず、OpenAI API 呼び出しのためにメモリ上で Base64 data URL に変換します。
-- 対応画像は JPEG、PNG、WebP、GIF です。
-- 既定のモデルは `.env` の `OPENAI_MODEL` で変更できます。
-- 画像サイズ上限は `IMAGE_UPLOAD_MAX_BYTES` で変更できます。
+同じ Wi-Fi のスマホから確認する場合は、PC の LAN IP を使って Django を `0.0.0.0:8000` で起動してください。
+
+```powershell
+.\.venv\Scripts\python.exe manage.py runserver 0.0.0.0:8000
+```
+
+## テスト
+
+```powershell
+.\.venv\Scripts\python.exe manage.py test
+```
+
+## 主な設定
+
+| 変数 | 説明 | 例 |
+| --- | --- | --- |
+| `OPENAI_API_KEY` | OpenAI API キー | `sk-...` |
+| `OPENAI_MODEL` | 画像読み取りに使うモデル | `gpt-4.1-mini` |
+| `IMAGE_UPLOAD_MAX_BYTES` | アップロード画像の最大サイズ | `8388608` |
+| `DJANGO_DEBUG` | Django のデバッグモード | `True` / `False` |
+| `DJANGO_ALLOWED_HOSTS` | 許可するホスト名 | `127.0.0.1,localhost` |
 
 ## デプロイ
 
-Render などの Python 対応ホスティングにそのまま載せられる設定を含めています。
+Render に載せやすいように [render.yaml](render.yaml)、[Procfile](Procfile)、[runtime.txt](runtime.txt) を用意しています。
 
-必要な環境変数:
+Render で必要な環境変数:
 
 - `OPENAI_API_KEY`
 - `DJANGO_SECRET_KEY`
 - `DJANGO_DEBUG=False`
 - `DJANGO_ALLOWED_HOSTS`
 - `DJANGO_CSRF_TRUSTED_ORIGINS`
+- `OPENAI_MODEL=gpt-4.1-mini`
 
-Render では `render.yaml` を使って Blueprint として作成できます。
+Render の Blueprint でこのリポジトリを指定すると、`render.yaml` の設定でビルドと起動ができます。
+
+## 構成
+
+```text
+textpro/
+├─ ocr/                  # アップロード、画像検証、OpenAI 呼び出し
+├─ static/ocr/           # CSS、JavaScript、ロゴ
+├─ templates/ocr/        # 画面テンプレート
+├─ textpro/              # Django プロジェクト設定
+├─ docs/images/          # README 用の画面イメージ
+├─ render.yaml           # Render デプロイ設定
+├─ setup.ps1             # 初回セットアップ
+└─ run.ps1               # ローカル起動
+```
+
+## 注意
+
+- `.env` は `.gitignore` に入っているため、API キーは GitHub に上がりません。
+- 実行環境に Python が無い場合、`setup.ps1` は失敗します。Python 3.10 以上をインストールしてから実行してください。
+- 読み取り精度は写真の明るさ、ピント、文字の大きさに影響されます。
