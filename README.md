@@ -1,5 +1,7 @@
 # TextPro
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Hibiki0417/TextPro)
+
 手書き文字の写真をアップロードすると、OpenAI API で読み取り、コピーしやすいテキストに変換する Django アプリです。スマホのカメラからそのまま撮影して使えるように、画面はモバイル対応にしています。
 
 ![TextPro upload screen](docs/images/textpro-home.svg)
@@ -81,6 +83,8 @@ http://127.0.0.1:8000/
 ## デプロイ
 
 Render に載せやすいように [render.yaml](render.yaml)、[Procfile](Procfile)、[runtime.txt](runtime.txt) を用意しています。
+
+すぐにデプロイする場合は、上の **Deploy to Render** ボタンを押してください。
 
 Render で必要な環境変数:
 
